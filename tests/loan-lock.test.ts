@@ -64,7 +64,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 	})
 	it ("tests lockAda tx", async ({network, alice, bob, program}) => {
-// https://github.com/lley154/helios-examples/blob/704cf0a92cfe252b63ffb9fd36c92ffafc1d91f6/vesting/pages/index.tsx#LL157C1-L280C4
+
 		let optimize = false;
 		const benAddr = bob.address;
 		const adaQty = 10 ;
@@ -72,7 +72,6 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const compiledProgram = program.compile(optimize); 
 		const validatorHash = compiledProgram.validatorHash;
-		// https://www.hyperion-bt.org/helios-book/lang/builtins/address.html#address
 		const validatorAddress = Address.fromValidatorHash(validatorHash); 
 
 		const networkParamsFile = await fs.readFile('./src/preprod.json', 'utf8');
