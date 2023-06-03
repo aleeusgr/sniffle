@@ -9,6 +9,7 @@ import {
 	Datum,
 	IntData,
 	ListData,
+	MintingPolicyHash,
 	NetworkEmulator,
 	NetworkParams,
 	Program,
@@ -34,7 +35,20 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const alice = network.createWallet(BigInt(20000000));
 		network.createUtxo(alice, BigInt(5000000));
+
 		const bob = network.createWallet(BigInt(10000000));
+
+		const mph = '16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c';
+
+		const testAsset = new Assets();
+			testAsset.addComponent(
+			MintingPolicyHash.fromHex( mph ),
+			Array.from(new TextEncoder().encode('Test Asset Name')), BigInt(1)
+		);
+
+		// Add additional Token to the wallet
+		network.createUtxo(bob, minAda, testAsset);
+
 		network.tick(BigInt(10));
 
 		context.alice = alice;
