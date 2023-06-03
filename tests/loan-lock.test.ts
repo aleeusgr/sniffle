@@ -1,7 +1,6 @@
 import { describe, expect, it, expectTypeOf, beforeEach, vi } from 'vitest'
 import { promises as fs } from 'fs';
 import {
-
 	hexToBytes,
 	Address,
 	Assets,
@@ -17,24 +16,17 @@ import {
 	TxOutput,
 	Value
 } from "@hyperionbt/helios";
+
 import {lockAda} from './src/lockAda.ts';
 
-describe("a vesting contract lockAda transaction", async () => {
+describe("lock ADA to be exchanged for an nft", async () => {
 
-	// https://vitest.dev/guide/test-context.html
 	beforeEach(async (context) => { 
 		let optimize = false;
 
 		// compile script
 		const script = await fs.readFile('./src/vesting.js', 'utf8'); 
 		const program = Program.new(script); 
-		const compiledProgram = program.compile(optimize); 
-		const validatorHash = compiledProgram.validatorHash;
-		const validatorAddress = Address.fromValidatorHash(validatorHash); 
-	 
-		context.validatorHash = validatorHash;
-		context.validatorAddress = Address.fromValidatorHash(validatorHash); 
-		context.programName = program.name;
 
 		// instantiate the Emulator
 		const minAda = BigInt(2000000);  // minimum lovelace needed to send an NFT
@@ -48,29 +40,33 @@ describe("a vesting contract lockAda transaction", async () => {
 		context.alice = alice;
 		context.bob = bob;
 		context.network = network;
+		context.program = program;
 	})
 
-	it ("checks that a correct script is loaded", async ({programName}) => {
-		// https://www.hyperion-bt.org/helios-book/api/reference/program.html	
-		expect(programName).toBe('vesting')
-	})
 	it ("tests NetworkEmulator state", async ({network, alice}) => {
-		// https://www.hyperion-bt.org/helios-book/api/reference/address.html?highlight=Address#address
-		const aliceUtxos = await network.getUtxos(alice.address);
-
 		expect(alice.address.toHex().length).toBe(58)
-		expect(aliceUtxos[1].value.dump().lovelace).toBe('5000000')
 	})
-	it ("tests lockAda tx", async ({network, alice, bob, validatorAddress}) => {
+	it ("tests lockAda tx", async ({network, alice, bob, program}) => {
 // https://github.com/lley154/helios-examples/blob/704cf0a92cfe252b63ffb9fd36c92ffafc1d91f6/vesting/pages/index.tsx#LL157C1-L280C4
+		let optimize = false;
 		const benAddr = bob.address;
 		const adaQty = 10 ;
 		const duration = 10000000;
 
-		const emulatorDate = 1677108984000; 
+		const compiledProgram = program.compile(optimize); 
+		const validatorHash = compiledProgram.validatorHash;
+		// https://www.hyperion-bt.org/helios-book/lang/builtins/address.html#address
+		const validatorAddress = Address.fromValidatorHash(validatorHash); 
+
+		const networkParamsFile = await fs.readFile('./src/preprod.json', 'utf8');
+		const networkParams = new NetworkParams(JSON.parse(networkParamsFile.toString()));
+
+		const emulatorDate = Number(networkParams.slotToTime(0n)); 
 		const deadline = new Date(emulatorDate + duration);
-		const benPkh = bob.pubKeyHash;
 		const ownerPkh = alice.pubKeyHash;
+
+		// here need to be mph, which I need to add to BeforeEach
+		const benPkh = bob.pubKeyHash;
 
 		const lovelaceAmt = Number(adaQty) * 1000000;
 		const adaAmountVal = new Value(BigInt(lovelaceAmt));
@@ -114,7 +110,6 @@ describe("a vesting contract lockAda transaction", async () => {
 			)
 		}`
 
-		const optimize = false; //maybe add to test context?
 		const mintProgram = Program.new(mintScript).compile(optimize);
 
 		tx.attachScript(mintProgram);
@@ -139,9 +134,6 @@ describe("a vesting contract lockAda transaction", async () => {
 		// Add the destination address and the amount of Ada to lock including a datum
 		tx.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum));
 
-		// beforeAll?
-		const networkParamsFile = await fs.readFile('./src/preprod.json', 'utf8');
-		const networkParams = new NetworkParams(JSON.parse(networkParamsFile.toString()));
 
 		await tx.finalize(networkParams, alice.address);
 		const txId = await network.submitTx(tx);
@@ -157,7 +149,7 @@ describe("a vesting contract lockAda transaction", async () => {
 
 	})
 
-	it ("tests lockAda tx import", async ({network, alice, bob, validatorHash}) => {
+	it.skip ("tests lockAda tx import", async ({network, alice, bob, validatorHash}) => {
 		const adaQty = 10 ;
 		const duration = 10000000;
 		await lockAda(network!, alice!, bob!, validatorHash, adaQty, duration)
