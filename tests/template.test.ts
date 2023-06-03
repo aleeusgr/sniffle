@@ -26,12 +26,10 @@ describe("a template", async () => {
 
 		// compile script
 		const script = await fs.readFile('./src/vesting.js', 'utf8'); 
-		const compiledProgram = Program.new(script).compile(optimize); 
-		const validatorHash = compiledProgram.validatorHash;
-		const validatorAddress = Address.fromValidatorHash(validatorHash); 
+		const program = Program.new(script);
+		const compiledProgram = program.compile(optimize); 
 	 
-		context.validatorHash = validatorHash;
-		context.validatorAddress = Address.fromValidatorHash(validatorHash); 
+		context.program = program;
 
 		// instantiate the Emulator
 		const minAda = BigInt(2000000);  // minimum lovelace needed to send an NFT
@@ -48,7 +46,7 @@ describe("a template", async () => {
 
 	})
 
-	it ("docs the tx ingridients", async ({network, alice, validatorHash}) => {
+	it ("docs the tx ingridients", async ({network, alice, program}) => {
 		// https://www.hyperion-bt.org/helios-book/api/reference/address.html?highlight=Address#address
 		const aliceUtxos = await network.getUtxos(alice.address);
 		// todo
@@ -56,7 +54,7 @@ describe("a template", async () => {
 		// todo
 		expect(aliceUtxos[1].value.dump().lovelace).toBe('5000000')
 		// todo
-		expect(validatorHash.hex).toBe('e7015c6a1424d748f8241fe3a43b3a382b35dc9ca67320e3ee863dc8')
+		expect(program.name).toBe('vesting');
 	})
 
 	it ("adds new code", async ({network, alice, validatorHash}) => {
