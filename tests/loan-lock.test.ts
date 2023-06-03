@@ -55,10 +55,13 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		context.bob = bob;
 		context.network = network;
 		context.program = program;
+		context.mph = mph;
 	})
 
-	it ("tests NetworkEmulator state", async ({network, alice}) => {
+	it ("checks the initial state of the Emulator", async ({network, alice, bob, mph}) => {
 		expect(alice.address.toHex().length).toBe(58)
+		expect(Object.keys((await bob.utxos)[1].value.dump().assets)[0]).toBe(mph);
+
 	})
 	it ("tests lockAda tx", async ({network, alice, bob, program}) => {
 // https://github.com/lley154/helios-examples/blob/704cf0a92cfe252b63ffb9fd36c92ffafc1d91f6/vesting/pages/index.tsx#LL157C1-L280C4
