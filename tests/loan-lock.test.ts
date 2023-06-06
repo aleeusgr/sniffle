@@ -33,10 +33,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const minAda = BigInt(2000000);  // minimum lovelace needed to send an NFT
 		const network = new NetworkEmulator();
 
-		const alice = network.createWallet(BigInt(20000000));
-		network.createUtxo(alice, BigInt(5000000));
+		const lenny = network.createWallet(BigInt(20000000));
+		network.createUtxo(lenny, BigInt(5000000));
 
-		const bob = network.createWallet(BigInt(10000000));
+		const boris = network.createWallet(BigInt(10000000));
 
 		const mph = '16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c';
 
@@ -47,26 +47,26 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		);
 
 		// Add additional Token to the wallet
-		network.createUtxo(bob, minAda, testAsset);
+		network.createUtxo(boris, minAda, testAsset);
 
 		network.tick(BigInt(10));
 
-		context.alice = alice;
-		context.bob = bob;
+		context.lenny = lenny;
+		context.boris = boris;
 		context.network = network;
 		context.program = program;
 		context.mph = mph;
 	})
 
-	it ("checks the initial state of the Emulator", async ({network, alice, bob, mph}) => {
-		expect(alice.address.toHex().length).toBe(58)
-		expect(Object.keys((await bob.utxos)[1].value.dump().assets)[0]).toBe(mph);
+	it ("checks the initial state of the Emulator", async ({network, lenny, boris, mph}) => {
+		expect(lenny.address.toHex().length).toBe(58)
+		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mph);
 
 	})
-	it ("tests lockAda tx", async ({network, alice, bob, program}) => {
+	it ("tests lockAda tx", async ({network, lenny, boris, program}) => {
 
 		let optimize = false;
-		const benAddr = bob.address;
+		const benAddr = boris.address;
 		const adaQty = 10 ;
 		const duration = 10000000;
 
@@ -79,10 +79,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const emulatorDate = Number(networkParams.slotToTime(0n)); 
 		const deadline = new Date(emulatorDate + duration);
-		const ownerPkh = alice.pubKeyHash;
+		const ownerPkh = lenny.pubKeyHash;
 
 		// here need to be mph, which I need to add to BeforeEach
-		const benPkh = bob.pubKeyHash;
+		const benPkh = boris.pubKeyHash;
 
 		const lovelaceAmt = Number(adaQty) * 1000000;
 		const adaAmountVal = new Value(BigInt(lovelaceAmt));
@@ -92,7 +92,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 					    new IntData(BigInt(deadline.getTime()))]);
 		const inlineDatum = Datum.inline(datum);
 
-		const inputUtxos = await alice.utxos;
+		const inputUtxos = await lenny.utxos;
 
 		const tx = new Tx();
 
@@ -151,13 +151,13 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		tx.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum));
 
 
-		await tx.finalize(networkParams, alice.address);
+		await tx.finalize(networkParams, lenny.address);
 		const txId = await network.submitTx(tx);
 
 		network.tick(BigInt(10));
 
-		//alice utxos changed
-		expect((await alice.utxos)[0].value.dump().lovelace).toBe('14749259');
+		//lenny utxos changed
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749259');
 		expect(mintProgram.mintingPolicyHash.hex).toBe('702cd6229f16532ca9735f65037092d099b0ff78a741c82db0847bbf');	
 		
 		// validator address holds Vesting Key
@@ -165,14 +165,14 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 	})
 
-	it.skip ("tests lockAda tx import", async ({network, alice, bob, validatorHash}) => {
+	it.skip ("tests lockAda tx import", async ({network, lenny, boris, validatorHash}) => {
 		const adaQty = 10 ;
 		const duration = 10000000;
-		await lockAda(network!, alice!, bob!, validatorHash, adaQty, duration)
+		await lockAda(network!, lenny!, boris!, validatorHash, adaQty, duration)
 
 		const validatorAddress = Address.fromValidatorHash(validatorHash); 
-		expect((await alice.utxos)[0].value.dump().lovelace).toBe('5000000');
-		expect((await alice.utxos)[1].value.dump().lovelace).toBe('9755287');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('5000000');
+		expect((await lenny.utxos)[1].value.dump().lovelace).toBe('9755287');
 		expect(Object.keys((await network.getUtxos(validatorAddress))[0].value.dump().assets)[0]).toBe('702cd6229f16532ca9735f65037092d099b0ff78a741c82db0847bbf');
 	})
 })
