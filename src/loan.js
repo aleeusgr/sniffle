@@ -2,8 +2,7 @@ spending vesting
 
 struct Datum {
     creator: PubKeyHash
-    beneficiary: PubKeyHash
-    deadline: Time
+    collateral: MintingPolicyHash
 }
 
 enum Redeemer {
@@ -13,21 +12,16 @@ enum Redeemer {
 
 func main(datum: Datum, redeemer: Redeemer, context: ScriptContext) -> Bool {
     tx: Tx = context.tx;
-    now: Time = tx.time_range.start;
+    currentInput = context.get_current_input;
+	//https://www.hyperion-bt.org/helios-book/lang/builtins/txinput.html#value
 
     redeemer.switch {
         Cancel => {
-            // Check if deadline hasn't passed
-            (now < datum.deadline).trace("VS1: ") && 
-
             // Check that the owner signed the transaction
             tx.is_signed_by(datum.creator).trace("VS2: ")
         },
         Claim => {
-           // Check if deadline has passed.
-           (now > datum.deadline).trace("VS3: ") &&
 
-           // Check that the beneficiary signed the transaction.
            tx.is_signed_by(datum.beneficiary).trace("VS4: ")
         }
     }
