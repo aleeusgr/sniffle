@@ -1,72 +1,32 @@
-import { describe, expect, it, expectTypeOf, beforeEach, vi } from 'vitest'
 import { promises as fs } from 'fs';
 import {
-	hexToBytes,
-	Address,
-	Assets,
-	ByteArrayData,
-	ConstrData,
-	Datum,
-	IntData,
-	ListData,
-	MintingPolicyHash,
-	NetworkEmulator,
-	NetworkParams,
-	Program,
-	Tx,
-	TxOutput,
-	Value
+  Address,
+  Assets,
+  ByteArrayData,
+  ConstrData,
+  Datum,
+  hexToBytes,
+  IntData,
+  ListData,
+  NetworkEmulator,
+  NetworkParams,
+  Program, 
+  Tx,
+  TxOutput,
+  Value,
 } from "@hyperionbt/helios";
 
-import {lockAda} from './src/lock-loan.ts';
-
-describe("lock ADA to be exchanged for an nft", async () => {
-
-	beforeEach(async (context) => { 
-		let optimize = false;
-
-		// compile script
-		const script = await fs.readFile('./src/loan.js', 'utf8'); 
-		const program = Program.new(script); 
-
-		// instantiate the Emulator
-		const minAda = BigInt(2000000);  // minimum lovelace needed to send an NFT
-		const network = new NetworkEmulator();
-
-		const lenny = network.createWallet(BigInt(20000000));
-		network.createUtxo(lenny, BigInt(5000000));
-
-		const boris = network.createWallet(BigInt(10000000));
-
-		const mph = '16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c';
-
-		const testAsset = new Assets();
-			testAsset.addComponent(
-			MintingPolicyHash.fromHex( mph ),
-			Array.from(new TextEncoder().encode('Test Asset Name')), BigInt(1)
-		);
-
-		// Add additional Token to the wallet
-		network.createUtxo(boris, minAda, testAsset);
-
-		network.tick(BigInt(10));
-
-		context.lenny = lenny;
-		context.boris = boris;
-		context.network = network;
-		context.program = program;
-		context.mph = mph;
-	})
-
-	it ("checks the initial state of the Emulator", async ({network, lenny, boris, mph}) => {
-		expect(lenny.address.toHex().length).toBe(58)
-		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mph);
-
-	})
-	it ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, mph}) => {
+// https://github.com/lley154/helios-examples/blob/704cf0a92cfe252b63ffb9fd36c92ffafc1d91f6/vesting/pages/index.tsx#LL157C1-L280C4
+export const lockAda = async (
+		network: NetworkEmulator,
+		lenny : WalletEmulator,
+		boris : WalletEmulator,
+		program: Program,
+		adaQty : number,
+		mph : string
+		) => {
 
 		let optimize = false;
-		const adaQty = 10 ;
 
 		const compiledProgram = program.compile(optimize); 
 		const validatorHash = compiledProgram.validatorHash;
@@ -146,18 +106,4 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const txId = await network.submitTx(tx);
 
 		network.tick(BigInt(10));
-
-		//lenny utxos changed
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
-		
-	})
-
-	it ("tests lockAda tx import", async ({network, lenny, boris, program, mph}) => {
-		const optimize = false;
-		const adaQty = 10 ;
-		const duration = 10000000;
-		await lockAda(network!, lenny!, boris!, program, adaQty, mph)
-
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
-	})
-})
+}
