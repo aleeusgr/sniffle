@@ -63,7 +63,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mph);
 
 	})
-	it ("tests lockAda tx", async ({network, lenny, boris, program}) => {
+	it ("tests lockAda tx", async ({network, lenny, boris, program, mph}) => {
 
 		let optimize = false;
 		const benAddr = boris.address;
@@ -88,8 +88,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const adaAmountVal = new Value(BigInt(lovelaceAmt));
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
-					    new ByteArrayData(benPkh.bytes),
-					    new IntData(BigInt(deadline.getTime()))]);
+					    new ByteArrayData(mph)]);
 		const inlineDatum = Datum.inline(datum);
 
 		const inputUtxos = await lenny.utxos;
@@ -157,7 +156,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		network.tick(BigInt(10));
 
 		//lenny utxos changed
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749259');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
 		expect(mintProgram.mintingPolicyHash.hex).toBe('702cd6229f16532ca9735f65037092d099b0ff78a741c82db0847bbf');	
 		
 		// validator address holds Vesting Key
