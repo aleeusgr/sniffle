@@ -63,12 +63,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mph);
 
 	})
-	it ("tests lockAda tx", async ({network, lenny, boris, program, mph}) => {
+	it ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, mph}) => {
 
 		let optimize = false;
-		const benAddr = boris.address;
 		const adaQty = 10 ;
-		const duration = 10000000;
 
 		const compiledProgram = program.compile(optimize); 
 		const validatorHash = compiledProgram.validatorHash;
@@ -78,14 +76,9 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const networkParams = new NetworkParams(JSON.parse(networkParamsFile.toString()));
 
 		const emulatorDate = Number(networkParams.slotToTime(0n)); 
-		const deadline = new Date(emulatorDate + duration);
 		const ownerPkh = lenny.pubKeyHash;
 
-		// here need to be mph, which I need to add to BeforeEach
-		const benPkh = boris.pubKeyHash;
-
-		const lovelaceAmt = Number(adaQty) * 1000000;
-		const adaAmountVal = new Value(BigInt(lovelaceAmt));
+		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
 					    new ByteArrayData(mph)]);
@@ -144,11 +137,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
 			mintRedeemer
 		)
 
-		const lockedVal = new Value(adaAmountVal.lovelace, new Assets([[mintProgram.mintingPolicyHash, tokens]]));
+		const lockedVal = new Value(lovelaceAmt.lovelace, new Assets([[mintProgram.mintingPolicyHash, tokens]]));
 		
 		// Add the destination address and the amount of Ada to lock including a datum
 		tx.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum));
-
 
 		await tx.finalize(networkParams, lenny.address);
 		const txId = await network.submitTx(tx);
@@ -164,7 +156,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 	})
 
-	it.skip ("tests lockAda tx import", async ({network, lenny, boris, validatorHash}) => {
+	it ("tests lockAda tx import", async ({network, lenny, boris, program, mph}) => {
 		const adaQty = 10 ;
 		const duration = 10000000;
 		await lockAda(network!, lenny!, boris!, validatorHash, adaQty, duration)
