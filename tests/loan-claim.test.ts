@@ -111,6 +111,8 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const oracle = tx.dump().body;
 
+		expect(oracle.collateral[0].utxoIdx).toBe('0');
+		expect(Object.keys(oracle.inputs[0].origOutput.value.assets)[0]).toBe(mphHex);
 		await tx.finalize(networkParams, borisAddress, [spareUtxo]);
 		expect(oracle).toBe();
 	})
