@@ -80,6 +80,9 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
+		const encodedMPH = new ByteArrayData(mph);
+		expect(encodedMPH.toHex()).toBe(mph);
+
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
 					    new ByteArrayData(mph)]);
 		const inlineDatum = Datum.inline(datum);
