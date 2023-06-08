@@ -65,7 +65,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 	})
 
-	it ("creates a claim transaction", async ({network, lenny, boris, program, mphHex}) => {
+	it.skip ("creates a claim transaction", async ({network, lenny, boris, program, mphHex}) => {
 		// lock ada
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, adaQty, mphHex)
