@@ -46,9 +46,6 @@ export const lockAda = async (
 
 		const inputUtxos = await lenny.utxos;
 
-		const tx = new Tx();
-
-		tx.addInputs(inputUtxos);
 
 		const mintScript =`minting nft
 
@@ -80,7 +77,6 @@ export const lockAda = async (
 
 		const mintProgram = Program.new(mintScript).compile(optimize);
 
-		tx.attachScript(mintProgram);
 
 		// Construct the NFT that we will want to send as an output
 		const nftTokenName = ByteArrayData.fromString("Vesting Key").toHex();
@@ -91,16 +87,18 @@ export const lockAda = async (
 		const mintRedeemer = new ConstrData(0, []);
 
 		// Indicate the minting we want to include as part of this transaction
-		tx.mintTokens(
-			mintProgram.mintingPolicyHash,
-			tokens,
-			mintRedeemer
-		)
 
 		const lockedVal = new Value(lovelaceAmt.lovelace, new Assets([[mintProgram.mintingPolicyHash, tokens]]));
 		
-		// Add the destination address and the amount of Ada to lock including a datum
-		tx.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum));
+		const tx = new Tx()
+			.addInputs(inputUtxos)
+			.attachScript(mintProgram)
+			.mintTokens(
+				mintProgram.mintingPolicyHash,
+				tokens,
+				mintRedeemer
+			)
+			.addOutput(new TxOutput(validatorAddress, lockedVal, inlineDatum));
 
 		await tx.finalize(networkParams, lenny.address);
 		const txId = await network.submitTx(tx);
