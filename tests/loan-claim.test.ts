@@ -84,18 +84,17 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		expect(Object.keys(valUtxo.value.dump().assets)[0]).toEqual('702cd6229f16532ca9735f65037092d099b0ff78a741c82db0847bbf')
 
 		const borisAddress = await boris.address;
-		const borisUtxos = (await boris.utxos);
+		const borisUtxos = await boris.utxos;
 		const colatUtxo = borisUtxos[0];
-		const nftUtxo = borisUtxos[1];
+		const nftUtxo   = borisUtxos[1];
 		const spareUtxo = borisUtxos[2];
-		expect(colatUtxo.value.dump().lovelace).toBe('10000000');
+		expect(colatUtxo.value.lovelace).toBe(10000000n);
 		expect(nftUtxo.value.assets.mintingPolicies[0].hex).toBe(mph);
 		expect(spareUtxo.value.lovelace).toBe(100000000n);
 
 		const emulatorDate = Number(await networkParams.slotToTime(0n)); 
 		const earlierTime = new Date(emulatorDate);
 		const laterTime = new Date(emulatorDate + 3 * 60 * 60 * 1000);
-
 
 		const tx = new Tx()
 			.addInput(valUtxo, valRedeemer)
@@ -108,9 +107,9 @@ describe("lock ADA to be exchanged for an nft", async () => {
 			.attachScript(compiledScript)
 			.addCollateral(colatUtxo)
 
-
 		const oracle = tx.dump().body;
 
 		await tx.finalize(networkParams, borisAddress, [spareUtxo]);
+		expect(oracle).toBe();
 	})
 })
