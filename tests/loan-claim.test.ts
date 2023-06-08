@@ -38,11 +38,11 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const boris = network.createWallet(BigInt(10000000));
 
-		const mph = '16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c';
+		const mphHex = '16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c';
 
 		const testAsset = new Assets();
 			testAsset.addComponent(
-			MintingPolicyHash.fromHex( mph ),
+			MintingPolicyHash.fromHex( mphHex ),
 			Array.from(new TextEncoder().encode('Test Asset Name')), BigInt(1)
 		);
 
@@ -56,21 +56,23 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		context.boris = boris;
 		context.network = network;
 		context.program = program;
-		context.mph = mph;
+		context.mphHex = mphHex;
 	})
 
-	it ("checks the initial state of the Emulator", async ({network, lenny, boris, mph}) => {
+	it ("checks the initial state of the Emulator", async ({network, lenny, boris, mphHex}) => {
 		expect(lenny.address.toHex().length).toBe(58)
-		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mph);
+		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mphHex);
 
 	})
 
-	it ("creates a claim transaction", async ({network, lenny, boris, program, mph}) => {
-		const optimize = false;
+	it ("creates a claim transaction", async ({network, lenny, boris, program, mphHex}) => {
+		// lock ada
 		const adaQty = 10 ;
-		await lockAda(network!, lenny!, boris!, program, adaQty, mph)
+		await lockAda(network!, lenny!, boris!, program, adaQty, mphHex)
 		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
 		
+		// tx parameters
+		const optimize = false;
 		const compiledScript = program.compile(optimize);
 		const validatorHash = compiledScript.validatorHash;
 		const validatorAddress = Address.fromValidatorHash(validatorHash);
@@ -89,7 +91,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const nftUtxo   = borisUtxos[1];
 		const spareUtxo = borisUtxos[2];
 		expect(colatUtxo.value.lovelace).toBe(10000000n);
-		expect(nftUtxo.value.assets.mintingPolicies[0].hex).toBe(mph);
+		expect(nftUtxo.value.assets.mintingPolicies[0].hex).toBe(mphHex);
 		expect(spareUtxo.value.lovelace).toBe(100000000n);
 
 		const emulatorDate = Number(await networkParams.slotToTime(0n)); 
