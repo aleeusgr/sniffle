@@ -149,6 +149,8 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		//lenny utxos changed
 		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
+		const validatorUtxos = await network.getUtxos(validatorAddress)
+		expect(validatorUtxos[0].value.lovelace).toBe(10000000n);
 		
 	})
 
