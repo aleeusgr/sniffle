@@ -1,3 +1,6 @@
+June 9, 2023
+v0.0.2: add a claimLoan tx and its checks.
+
 June 7, 2023
 v0.0.1: add a loan validator and a lock-loan tx.
 
