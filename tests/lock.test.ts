@@ -155,13 +155,13 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
 
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750975');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14751063');
 
 		const compiledProgram = program.compile(optimize); 
 		const validatorHash = compiledProgram.validatorHash;
 		const validatorAddress = Address.fromValidatorHash(validatorHash); 
 
-		expect((await network.getUtxos(validatorAddress))[0].origOutput.datum.data.list[0].toHex()).toBe('95d3c44f6d118c911748e400f41c524a7cb2c706a0e96558a35a0df7');
+		expect((await network.getUtxos(validatorAddress))[0].origOutput.datum.data.toHex()).toBe('95d3c44f6d118c911748e400f41c524a7cb2c706a0e96558a35a0df7');
 
 	})
 })

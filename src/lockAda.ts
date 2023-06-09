@@ -40,7 +40,8 @@ export const lockAda = async (
 
 		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
-		const datum = new ListData([new ByteArrayData(ownerPkh.bytes)]);
+		const datum = new ByteArrayData(ownerPkh.bytes);
+		//const datum = new ListData([new ByteArrayData(ownerPkh.bytes)]);
 					    // new ByteArrayData(testAsset.mintingPolicies[0].bytes)]);
 
 		const inlineDatum = Datum.inline(datum);
