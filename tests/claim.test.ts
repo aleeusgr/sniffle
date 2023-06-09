@@ -101,5 +101,6 @@ describe("lock ADA to be exchanged for an nft", async () => {
                         .addSigner(changeAddr.pubKeyHash)
                         .attachScript(compiledProgram)
                         .addCollateral(colUtxo);
+		await tx.finalize(networkParams, changeAddr);
 	})
 })
