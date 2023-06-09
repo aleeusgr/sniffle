@@ -54,18 +54,18 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		context.network = network;
 		context.program = program;
 		context.testAsset = testAsset;
-	})
-
-	it ("checks the initial state of the Emulator", async ({network, lenny, boris, testAsset}) => {
-		expect(lenny.address.toHex().length).toBe(58)
 		// https://www.hyperion-bt.org/helios-book/api/reference/assets.html
 		// https://www.hyperion-bt.org/helios-book/api/reference/mintingpolicyhash.html
-		const mphHex = testAsset.mintingPolicies[0].hex;
-		expect(mphHex).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
-		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe(mphHex);
+		context.mphHex = testAsset.mintingPolicies[0].hex;
+		context.mphBytes = testAsset.mintingPolicies[0].bytes;
+	})
+
+	it ("checks the initial state of the Emulator", async ({network, lenny, boris}) => {
+		expect(lenny.address.toHex().length).toBe(58)
+		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
 
 	})
-	it.skip ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, testAsset}) => {
+	it ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, mphHex, mphBytes}) => {
 
 		let optimize = false;
 		const adaQty = 10 ;
@@ -83,7 +83,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
-					    new ByteArrayData(mph)]);
+					    new ByteArrayData(mphBytes)]);
 
 		const inlineDatum = Datum.inline(datum);
 
@@ -145,16 +145,20 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		network.tick(BigInt(10));
 
 		//lenny utxos changed
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749655');
+		//??? 
+		expect(tx.dump().body.outputs[0].datum.inlineSchema.list[1].bytes).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
+		expect((await network.getUtxos(validatorAddress))[0].origOutput.datum.data.list[1].toHex()).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');	
 		
 	})
 
-	it.skip ("tests lockAda tx import", async ({network, lenny, boris, program, mph}) => {
+	it ("tests lockAda tx import", async ({network, lenny, boris, program, mphHex}) => {
 		const optimize = false;
 		const adaQty = 10 ;
 		const duration = 10000000;
-		await lockAda(network!, lenny!, boris!, program, adaQty, mph)
+		await lockAda(network!, lenny!, boris!, program, adaQty, mphHex)
 
 		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
+
 	})
 })
