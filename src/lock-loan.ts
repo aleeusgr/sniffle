@@ -22,8 +22,8 @@ export const lockAda = async (
 		lenny : WalletEmulator,
 		boris : WalletEmulator,
 		program: Program,
+		testAsset : Assets,
 		adaQty : number,
-		mph : string
 		) => {
 
 		let optimize = false;
@@ -41,7 +41,8 @@ export const lockAda = async (
 		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
-					    new ByteArrayData(mph)]);
+					    new ByteArrayData(testAsset.mintingPolicies[0].bytes)]);
+
 		const inlineDatum = Datum.inline(datum);
 
 		const inputUtxos = await lenny.utxos;
