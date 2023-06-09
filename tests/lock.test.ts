@@ -56,8 +56,6 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		context.testAsset = testAsset;
 		// https://www.hyperion-bt.org/helios-book/api/reference/assets.html
 		// https://www.hyperion-bt.org/helios-book/api/reference/mintingpolicyhash.html
-		context.mphHex = testAsset.mintingPolicies[0].hex;
-		context.mphBytes = testAsset.mintingPolicies[0].bytes;
 	})
 
 	it ("checks the initial state of the Emulator", async ({network, lenny, boris}) => {
@@ -65,7 +63,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		expect(Object.keys((await boris.utxos)[1].value.dump().assets)[0]).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
 
 	})
-	it ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, mphHex, mphBytes}) => {
+	it ("lenny locks 10 ada to exchange for an nft", async ({network, lenny, boris, program, testAsset}) => {
 
 		let optimize = false;
 		const adaQty = 10 ;
@@ -83,7 +81,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const lovelaceAmt = new Value(BigInt(Number(adaQty) * 1000000)); 
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
-					    new ByteArrayData(mphBytes)]);
+					    new ByteArrayData(testAsset.mintingPolicies[0].bytes)]);
 
 		const inlineDatum = Datum.inline(datum);
 
@@ -152,10 +150,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		
 	})
 
-	it ("tests lockAda tx import", async ({network, lenny, boris, program, mphHex}) => {
+	it ("tests lockAda tx import", async ({network, lenny, boris, program, testAsset}) => {
 		const optimize = false;
 		const adaQty = 10 ;
-		const duration = 10000000;
+		const mphHex = testAsset.mintingPolicies[0].hex;
 		await lockAda(network!, lenny!, boris!, program, adaQty, mphHex)
 
 		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750843');
