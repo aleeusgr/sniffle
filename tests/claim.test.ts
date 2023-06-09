@@ -18,7 +18,7 @@ import {
 	Value
 } from "@hyperionbt/helios";
 
-import {lockAda} from './src/lock-loan.ts';
+import {lockAda} from './src/lockAda.ts';
 
 describe("lock ADA to be exchanged for an nft", async () => {
 
