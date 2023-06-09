@@ -82,6 +82,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
 					    new ByteArrayData(testAsset.mintingPolicies[0].bytes)]);
+					    // ByteArrayData.fromString(testAsset.mintingPolicies[0].hex)]);
 
 		const inlineDatum = Datum.inline(datum);
 
