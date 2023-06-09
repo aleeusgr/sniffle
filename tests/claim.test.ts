@@ -91,5 +91,15 @@ describe("lock ADA to be exchanged for an nft", async () => {
                 const nftUtxo = borisUtxos[1];
                 const sprUtxo = borisUtxos[2];
 
+                const tx = new Tx()
+                        .addInputs([nftUtxo])
+                        .addInputs(validatorUtxos, valRedeemer)
+                        .addOutput(new TxOutput(changeAddr, validatorUtxos[0].value))
+                        .addOutput(new TxOutput(validatorAddress, nftUtxo.value))
+                        .validFrom(initTime)
+                        .validTo(exprTime)
+                        .addSigner(changeAddr.pubKeyHash)
+                        .attachScript(compiledProgram)
+                        .addCollateral(colUtxo);
 	})
 })
