@@ -12,10 +12,10 @@ enum Redeemer {
 
 func main(datum: Datum, redeemer: Redeemer, context: ScriptContext) -> Bool {
 	tx: Tx = context.tx;
-	currentInput: TxInput = context.get_current_input();
-	inputValue: Value = currentInput.value;
-	// https://www.hyperion-bt.org/helios-book/lang/builtins/value.html?highlight=value#contains_policy
-	
+	// https://www.hyperion-bt.org/helios-book/lang/builtins/list.html
+	// https://www.hyperion-bt.org/helios-book/lang/builtins/scriptcontext.html?#get_cont_outputs
+	currentInput: []TxOutput = context.get_cont_outputs();
+	inputValue: Value = currentInput.head.value;
 
     redeemer.switch {
         Cancel => {
@@ -23,6 +23,7 @@ func main(datum: Datum, redeemer: Redeemer, context: ScriptContext) -> Bool {
             tx.is_signed_by(datum.creator).trace("VS1: ")
         },
         Claim => {
+		// https://www.hyperion-bt.org/helios-book/lang/builtins/value.html?highlight=value#contains_policy
 		inputValue.contains_policy(datum.collateral).trace("VS2: ")
         }
     }

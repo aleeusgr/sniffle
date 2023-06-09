@@ -18,7 +18,7 @@ import {
 	Value
 } from "@hyperionbt/helios";
 
-import {lockAda} from './src/lock-loan.ts';
+import {lockAda} from './src/lock.ts';
 
 describe("lock ADA to be exchanged for an nft", async () => {
 
@@ -26,7 +26,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		let optimize = false;
 
 		// compile script
-		const script = await fs.readFile('./src/loan.js', 'utf8'); 
+		const script = await fs.readFile('./src/onchain.hl', 'utf8'); 
 		const program = Program.new(script); 
 
 		// instantiate the Emulator
@@ -82,6 +82,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		const datum = new ListData([new ByteArrayData(ownerPkh.bytes),
 					    new ByteArrayData(testAsset.mintingPolicies[0].bytes)]);
+					    // ByteArrayData.fromString(testAsset.mintingPolicies[0].hex)]);
 
 		const inlineDatum = Datum.inline(datum);
 
