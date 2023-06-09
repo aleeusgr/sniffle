@@ -76,5 +76,10 @@ describe("lock ADA to be exchanged for an nft", async () => {
                 const validatorUtxos = await network.getUtxos(validatorAddress)
                 expect(validatorUtxos[0].value.lovelace).toBe(10000000n);
 
+		const networkParamsFile = await fs.readFile('./src/preprod.json', 'utf8');
+                const networkParams = new NetworkParams(JSON.parse(networkParamsFile.toString()));
+		const initTime = new Date(Number(networkParams.slotToTime(0n)));
+                const exprTime = new Date(Number(networkParams.slotToTime(100n)));
+
 	})
 })
