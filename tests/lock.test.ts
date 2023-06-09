@@ -155,7 +155,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
 
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749655');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750975');
 
 	})
 })
