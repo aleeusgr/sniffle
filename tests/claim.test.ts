@@ -46,6 +46,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 		// Add additional Token to the wallet
 		network.createUtxo(boris, minAda, testAsset);
+		network.createUtxo(boris, BigInt(10**8));
 
 		network.tick(BigInt(10));
 
@@ -68,7 +69,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 	it ("tests lockAda tx import", async ({network, lenny, boris, program, testAsset}) => {
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
-		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14750975');
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14751063');
 
 		const optimize = false;
 		const compiledProgram = program.compile(optimize); 
@@ -101,6 +102,6 @@ describe("lock ADA to be exchanged for an nft", async () => {
                         .addSigner(changeAddr.pubKeyHash)
                         .attachScript(compiledProgram)
                         .addCollateral(colUtxo);
-		await tx.finalize(networkParams, changeAddr);
+		await tx.finalize(networkParams, changeAddr, [sprUtxo]);
 	})
 })
