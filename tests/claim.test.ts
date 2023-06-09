@@ -103,5 +103,18 @@ describe("lock ADA to be exchanged for an nft", async () => {
                         .attachScript(compiledProgram)
                         .addCollateral(colUtxo);
 		await tx.finalize(networkParams, changeAddr, [sprUtxo]);
+		const txId = await network.submitTx(tx);
+
+		network.tick(BigInt(10));
+
+		// validator contains the nft:
+		expect((await network.getUtxos(validatorAddress))[0].origOutput.value.assets.mintingPolicies[0].hex).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
+
+		expect(txId.hex).toBe('c9579254666343d5a4d64f83fa40c15ed866e9ed53d80ccd28025112d5976274');
+		const utxos = await boris.utxos;
+		expect(utxos[0].txId.hex).toBe('0000000000000000000000000000000000000000000000000000000000000002');
+		expect(utxos[1].txId.hex).toBe('c9579254666343d5a4d64f83fa40c15ed866e9ed53d80ccd28025112d5976274');
+		expect(utxos[2].txId.hex).toBe('c9579254666343d5a4d64f83fa40c15ed866e9ed53d80ccd28025112d5976274');
+
 	})
 })
