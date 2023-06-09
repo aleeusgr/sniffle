@@ -27,7 +27,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 		let optimize = false;
 
 		// compile script
-		const script = await fs.readFile('./src/loan.js', 'utf8'); 
+		const script = await fs.readFile('./src/onchain.hl', 'utf8'); 
 		const program = Program.new(script); 
 
 		// instantiate the Emulator
