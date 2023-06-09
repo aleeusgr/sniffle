@@ -64,6 +64,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 
 	})
 
+	// https://blog.logrocket.com/understanding-exclamation-mark-typescript/
 	it ("tests lockAda tx import", async ({network, lenny, boris, program, testAsset}) => {
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
@@ -74,12 +75,21 @@ describe("lock ADA to be exchanged for an nft", async () => {
                 const validatorHash = compiledProgram.validatorHash;
                 const validatorAddress = Address.fromValidatorHash(validatorHash); 
                 const validatorUtxos = await network.getUtxos(validatorAddress)
+
                 expect(validatorUtxos[0].value.lovelace).toBe(10000000n);
 
 		const networkParamsFile = await fs.readFile('./src/preprod.json', 'utf8');
                 const networkParams = new NetworkParams(JSON.parse(networkParamsFile.toString()));
 		const initTime = new Date(Number(networkParams.slotToTime(0n)));
                 const exprTime = new Date(Number(networkParams.slotToTime(100n)));
+
+                const valRedeemer = new ConstrData(1, []);
+
+                const borisUtxos = await boris.utxos;
+                const changeAddr = await boris.address;
+                const colUtxo = borisUtxos[0];
+                const nftUtxo = borisUtxos[1];
+                const sprUtxo = borisUtxos[2];
 
 	})
 })
