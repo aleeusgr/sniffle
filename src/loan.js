@@ -1,4 +1,4 @@
-spending vesting
+spending loan
 
 struct Datum {
     creator: PubKeyHash
