@@ -19,6 +19,7 @@ import {
 } from "@hyperionbt/helios";
 
 import {lockAda} from './src/lock-loan.ts';
+import {claimAda} from './src/claim.ts';
 
 describe("lock ADA to be exchanged for an nft", async () => {
 
@@ -66,7 +67,7 @@ describe("lock ADA to be exchanged for an nft", async () => {
 	})
 
 	// https://blog.logrocket.com/understanding-exclamation-mark-typescript/
-	it ("tests lockAda tx import", async ({network, lenny, boris, program, testAsset}) => {
+	it ("locks ada and claims, checks ledger state", async ({network, lenny, boris, program, testAsset}) => {
 		const adaQty = 10 ;
 		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
 		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749655');
@@ -111,8 +112,19 @@ describe("lock ADA to be exchanged for an nft", async () => {
                 // validator contains the nft:
                 expect((await network.getUtxos(validatorAddress))[0].origOutput.value.assets.mintingPolicies[0].hex).toBe('16aa5486dab6527c4697387736ae449411c03dcd20a3950453e6779c');
 
-
                 expect(txId.hex).toBe('cbad5b5f57646b785fff405adb4ca1e3c71986427269ca0825bcf487efaeca06');
+                const utxos = await boris.utxos;
+                expect(utxos[0].txId.hex).toBe('0000000000000000000000000000000000000000000000000000000000000002');
+                expect(utxos[1].txId.hex).toBe('cbad5b5f57646b785fff405adb4ca1e3c71986427269ca0825bcf487efaeca06');
+                expect(utxos[2].txId.hex).toBe('cbad5b5f57646b785fff405adb4ca1e3c71986427269ca0825bcf487efaeca06');
+	})
+
+	it ("checks correctness of src/claimAda", async ({network, lenny, boris, program, testAsset}) => {
+		const adaQty = 10 ;
+		await lockAda(network!, lenny!, boris!, program, testAsset, adaQty)
+		expect((await lenny.utxos)[0].value.dump().lovelace).toBe('14749655');
+
+		await claimAda(network!, lenny!, boris!, program, testAsset)
                 const utxos = await boris.utxos;
                 expect(utxos[0].txId.hex).toBe('0000000000000000000000000000000000000000000000000000000000000002');
                 expect(utxos[1].txId.hex).toBe('cbad5b5f57646b785fff405adb4ca1e3c71986427269ca0825bcf487efaeca06');
